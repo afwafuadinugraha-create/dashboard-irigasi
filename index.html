@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Inventarisasi Unit Irigasi</title>
+    <!-- Tailwind CSS (CDN) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Chart.js (CDN) -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- FontAwesome Icons (CDN) -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        body { font-family: 'Inter', sans-serif; }
+    </style>
+</head>
+<body class="bg-slate-100 text-slate-800 antialiased min-h-screen flex flex-col">
+
+    <!-- Header Navigation -->
+    <header class="bg-slate-900 text-white shadow-lg sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex flex-col md:flex-row justify-between items-center gap-4">
+            <div class="flex items-center gap-3">
+                <div class="p-2.5 bg-blue-600 rounded-xl shadow-md">
+                    <i class="fa-solid fa-water-ladder text-2xl text-white"></i>
+                </div>
+                <div>
+                    <h1 class="text-xl font-bold tracking-tight">Dashboard Inventarisasi Unit Irigasi</h1>
+                    <p class="text-xs text-slate-400">Update Data: Juni/Juli 2026 | Monitoring Engine, Irrigator, Pipa, & Pompa</p>
+                </div>
+            </div>
+            
+            <!-- Quick Filter & Print -->
+            <div class="flex items-center gap-3">
+                <select id="pgFilter" onchange="applyFilters()" class="bg-slate-800 border border-slate-700 text-white text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 p-2.5">
+                    <option value="ALL">Semua Plantation Group (PG)</option>
+                    <option value="PG1">PG1</option>
+                    <option value="PG2">PG2</option>
+                    <option value="PG3">PG3</option>
+                    <option value="PG4">PG4</option>
+                </select>
+                <button onclick="window.print()" class="bg-blue-600 hover:bg-blue-700 text-white text-sm px-4 py-2.5 rounded-lg font-medium transition flex items-center gap-2 shadow-sm">
+                    <i class="fa-solid fa-print"></i> Cetak / PDF
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content Area -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-1 w-full space-y-8">
+
+        <!-- KPI Summary Cards -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            <!-- Engine Card -->
+            <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-200/80 hover:shadow-md transition">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Total Engine</p>
+                        <h3 id="kpiEngine" class="text-3xl font-bold text-slate-900 mt-2">586</h3>
+                        <p class="text-xs text-emerald-600 font-medium mt-1"><i class="fa-solid fa-circle-check"></i> 524 Normal (89%)</p>
+                    </div>
+                    <div class="p-4 bg-blue-50 text-blue-600 rounded-2xl">
+                        <i class="fa-solid fa-truck-monster text-2xl"></i>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Irrigator Card -->
+            <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-200/80 hover:shadow-md transition">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Total Irrigator</p>
+                        <h3 id="kpiIrr" class="text-3xl font-bold text-slate-900 mt-2">370</h3>
+                        <p class="text-xs text-emerald-600 font-medium mt-1"><i class="fa-solid fa-circle-check"></i> 357 Normal (96%)</p>
+                    </div>
+                    <div class="p-4 bg-teal-50 text-teal-600 rounded-2xl">
+                        <i class="fa-solid fa-shower text-2xl"></i>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Pipa Card -->
+            <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-200/80 hover:shadow-md transition">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Total Pipa (Meter)</p>
+                        <h3 id="kpiPipa" class="text-3xl font-bold text-slate-900 mt-2">81,618</h3>
+                        <p class="text-xs text-indigo-600 font-medium mt-1"><i class="fa-solid fa-ruler-horizontal"></i> 49.3k Meter HDPE</p>
+                    </div>
+                    <div class="p-4 bg-indigo-50 text-indigo-600 rounded-2xl">
+                        <i class="fa-solid fa-lines-leaning text-2xl"></i>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Pompa Card -->
+            <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-200/80 hover:shadow-md transition">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Total Pompa</p>
+                        <h3 id="kpiPompa" class="text-3xl font-bold text-slate-900 mt-2">731</h3>
+                        <p class="text-xs text-emerald-600 font-medium mt-1"><i class="fa-solid fa-circle-check"></i> 695 Aktif (95%)</p>
+                    </div>
+                    <div class="p-4 bg-sky-50 text-sky-600 rounded-2xl">
+                        <i class="fa-solid fa-faucet-drip text-2xl"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Charts Grid Section 1 -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200/80">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-base font-semibold text-slate-800">Distribusi Aset per Plantation Group (PG)</h3>
+                    <span class="text-xs bg-slate-100 text-slate-600 px-2.5 py-1 rounded-full font-medium">Unit & Meter</span>
+                </div>
+                <div class="relative h-72">
+                    <canvas id="chartPG"></canvas>
+                </div>
+            </div>
+
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200/80">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-base font-semibold text-slate-800">Kondisi Kelaikan Engine & Irrigator</h3>
+                    <span class="text-xs bg-slate-100 text-slate-600 px-2.5 py-1 rounded-full font-medium">Status Fisik</span>
+                </div>
+                <div class="relative h-72">
+                    <canvas id="chartKondisi"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Charts Grid Section 2 -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200/80">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-base font-semibold text-slate-800">Proporsi Jenis Pipa Irigasi (Meter)</h3>
+                    <span class="text-xs bg-slate-100 text-slate-600 px-2.5 py-1 rounded-full font-medium">Material</span>
+                </div>
+                <div class="relative h-72">
+                    <canvas id="chartPipa"></canvas>
+                </div>
+            </div>
+
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200/80">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-base font-semibold text-slate-800">Sebaran Jenis Pompa (Deep Well vs Reservoir)</h3>
+                    <span class="text-xs bg-slate-100 text-slate-600 px-2.5 py-1 rounded-full font-medium">Kategori</span>
+                </div>
+                <div class="relative h-72">
+                    <canvas id="chartPompa"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Data Tables with Tabs & Search -->
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-200/80 overflow-hidden">
+            <div class="border-b border-slate-200 bg-slate-50/50 px-6 pt-4 flex flex-wrap gap-4">
+                <button onclick="switchTab('engine')" id="tab-engine" class="tab-btn active text-sm font-semibold text-blue-600 border-b-2 border-blue-600 pb-3 flex items-center gap-2">
+                    <i class="fa-solid fa-truck-monster"></i> Engine (586)
+                </button>
+                <button onclick="switchTab('irr')" id="tab-irr" class="tab-btn text-sm font-semibold text-slate-500 border-b-2 border-transparent pb-3 flex items-center gap-2 hover:text-slate-700">
+                    <i class="fa-solid fa-shower"></i> Irrigator (370)
+                </button>
+                <button onclick="switchTab('pipa')" id="tab-pipa" class="tab-btn text-sm font-semibold text-slate-500 border-b-2 border-transparent pb-3 flex items-center gap-2 hover:text-slate-700">
+                    <i class="fa-solid fa-lines-leaning"></i> Pipa (27 Baris)
+                </button>
+                <button onclick="switchTab('pompa')" id="tab-pompa" class="tab-btn text-sm font-semibold text-slate-500 border-b-2 border-transparent pb-3 flex items-center gap-2 hover:text-slate-700">
+                    <i class="fa-solid fa-faucet-drip"></i> Pompa (37 Baris)
+                </button>
+            </div>
+
+            <div class="p-6">
+                <div class="mb-4 flex items-center justify-between gap-4">
+                    <div class="relative flex-1 max-w-md">
+                        <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                        <input type="text" id="tableSearch" onkeyup="filterTable()" placeholder="Cari kode, gudang, spesifikasi..." class="w-full pl-9 pr-4 py-2 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                    </div>
+                    <span id="rowCount" class="text-xs text-slate-500 font-medium">Menampilkan data...</span>
+                </div>
+
+                <div class="overflow-x-auto max-h-[450px]">
+                    <table class="w-full text-sm text-left text-slate-600">
+                        <thead id="tableHead" class="text-xs text-slate-700 uppercase bg-slate-100/80 sticky top-0 backdrop-blur-sm"></thead>
+                        <tbody id="tableBody" class="divide-y divide-slate-100"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-slate-900 text-slate-400 text-xs py-6 mt-12 border-t border-slate-800">
+        <div class="max-w-7xl mx-auto px-4 text-center space-y-2">
+            <p>© 2026 Dashboard Inventarisasi Unit Irigasi. All rights reserved.</p>
+            <p class="text-slate-500">Data bersumber dari Laporan Inventarisasi Unit Irigasi Update Juni/Juli 2026.</p>
+        </div>
+    </footer>
+
+    <!-- App Logic & Embedded Data -->
+    <script>
+        // Sample summary datasets from Excel
+        const pipaData = [
+            {"PG": "PG1", "Gudang": "Lakop", "Jenis_Pipa": "Galvanis", "Sub_Total": "1178", "Good": "1178", "Reject": "223"},
+            {"PG": "PG1", "Gudang": "Lakop", "Jenis_Pipa": "HDPE", "Sub_Total": "2849", "Good": "2849", "Reject": "12"},
+            {"PG": "PG1", "Gudang": "Lakop", "Jenis_Pipa": "PE Roll Eks. Irrigator", "Sub_Total": "2551", "Good": "2551", "Reject": "0"},
+            {"PG": "PG1", "Gudang": "Kijung", "Jenis_Pipa": "Galvanis", "Sub_Total": "1152", "Good": "1152", "Reject": "340"},
+            {"PG": "PG1", "Gudang": "Kijung", "Jenis_Pipa": "HDPE", "Sub_Total": "3327", "Good": "3327", "Reject": "0"},
+            {"PG": "PG1", "Gudang": "Kijung", "Jenis_Pipa": "PE Roll Eks. Irrigator", "Sub_Total": "8401", "Good": "8401", "Reject": "0"},
+            {"PG": "PG2", "Gudang": "Central PG2", "Jenis_Pipa": "HDPE", "Sub_Total": "4340", "Good": "4340", "Reject": "100"},
+            {"PG": "PG2", "Gudang": "Divisi 4", "Jenis_Pipa": "Galvanis", "Sub_Total": "4604", "Good": "4421", "Reject": "105"},
+            {"PG": "PG3", "Gudang": "Divisi 5", "Jenis_Pipa": "HDPE", "Sub_Total": "10775", "Good": "10775", "Reject": "30"},
+            {"PG": "PG3", "Gudang": "Divisi 6", "Jenis_Pipa": "HDPE", "Sub_Total": "10045", "Good": "10045", "Reject": "0"},
+            {"PG": "PG4", "Gudang": "Kantor Project Nanas", "Jenis_Pipa": "HDPE", "Sub_Total": "6878", "Good": "6878", "Reject": "0"}
+        ];
+
+        const pompaData = [
+            {"PG": "PG1", "Gudang": "Lakop", "Jenis_Pompa": "Deep Well", "Spec_Pompa": "Goulds Pump", "Grand_Total": "1", "Aktif": "1", "Re_Kondisi": "0", "Scrap": "0"},
+            {"PG": "PG1", "Gudang": "Lakop", "Jenis_Pompa": "Reservoir", "Spec_Pompa": "EbaraPump150x100FSKA", "Grand_Total": "4", "Aktif": "4", "Re_Kondisi": "0", "Scrap": "0"},
+            {"PG": "PG1", "Gudang": "Kijung", "Jenis_Pompa": "Reservoir", "Spec_Pompa": "EbaraPump150x100FS4KA", "Grand_Total": "19", "Aktif": "13", "Re_Kondisi": "6", "Scrap": "0"},
+            {"PG": "PG2", "Gudang": "Central PG2", "Jenis_Pompa": "Deep Well", "Spec_Pompa": "IDP (Ingersoll Dresser Pump)", "Grand_Total": "16", "Aktif": "16", "Re_Kondisi": "0", "Scrap": "0"},
+            {"PG": "PG2", "Gudang": "Divisi 4", "Jenis_Pompa": "Reservoir", "Spec_Pompa": "EbaraPump150x125FS4LA", "Grand_Total": "18", "Aktif": "14", "Re_Kondisi": "4", "Scrap": "0"},
+            {"PG": "PG3", "Gudang": "Divisi 5", "Jenis_Pompa": "Reservoir", "Spec_Pompa": "EbaraPump125x100FS4LA", "Grand_Total": "152", "Aktif": "151", "Re_Kondisi": "1", "Scrap": "2"},
+            {"PG": "PG4", "Gudang": "Landasan", "Jenis_Pompa": "Deep Well", "Spec_Pompa": "Flowserve Pump", "Grand_Total": "60", "Aktif": "51", "Re_Kondisi": "9", "Scrap": "0"},
+            {"PG": "PG4", "Gudang": "Landasan", "Jenis_Pompa": "Reservoir", "Spec_Pompa": "EbaraPump150x100FSKA", "Grand_Total": "105", "Aktif": "96", "Re_Kondisi": "9", "Scrap": "0"}
+        ];
+
+        let currentTab = 'pipa';
+
+        function initCharts() {
+            new Chart(document.getElementById('chartPG').getContext('2d'), {
+                type: 'bar',
+                data: {
+                    labels: ['PG1', 'PG2', 'PG3', 'PG4'],
+                    datasets: [
+                        { label: 'Engine (Unit)', data: [175, 143, 181, 87], backgroundColor: '#3b82f6' },
+                        { label: 'Irrigator (Unit)', data: [95, 121, 121, 33], backgroundColor: '#14b8a6' },
+                        { label: 'Pompa (Unit)', data: [143, 131, 253, 204], backgroundColor: '#0284c7' }
+                    ]
+                },
+                options: { responsive: true, maintainAspectRatio: false }
+            });
+
+            new Chart(document.getElementById('chartKondisi').getContext('2d'), {
+                type: 'bar',
+                data: {
+                    labels: ['Normal', 'Service', 'Rusak Permanen / Scrap'],
+                    datasets: [
+                        { label: 'Engine', data: [524, 25, 36], backgroundColor: ['#10b981', '#f59e0b', '#ef4444'] },
+                        { label: 'Irrigator', data: [357, 6, 7], backgroundColor: ['#34d399', '#fbbf24', '#f87171'] }
+                    ]
+                },
+                options: { responsive: true, maintainAspectRatio: false }
+            });
+
+            new Chart(document.getElementById('chartPipa').getContext('2d'), {
+                type: 'doughnut',
+                data: {
+                    labels: ['HDPE', 'PE Roll Eks. Irrigator', 'Galvanis'],
+                    datasets: [{ data: [49384, 22417, 9817], backgroundColor: ['#6366f1', '#a855f7', '#ec4899'] }]
+                },
+                options: { responsive: true, maintainAspectRatio: false }
+            });
+
+            new Chart(document.getElementById('chartPompa').getContext('2d'), {
+                type: 'pie',
+                data: {
+                    labels: ['Reservoir Pump', 'Deep Well Pump'],
+                    datasets: [{ data: [522, 209], backgroundColor: ['#38bdf8', '#0284c7'] }]
+                },
+                options: { responsive: true, maintainAspectRatio: false }
+            });
+        }
+
+        function switchTab(tab) {
+            currentTab = tab;
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('text-blue-600', 'border-blue-600');
+                btn.classList.add('text-slate-500', 'border-transparent');
+            });
+            const activeBtn = document.getElementById('tab-' + tab);
+            if (activeBtn) {
+                activeBtn.classList.remove('text-slate-500', 'border-transparent');
+                activeBtn.classList.add('text-blue-600', 'border-blue-600');
+            }
+            renderTable();
+        }
+
+        function renderTable() {
+            const thead = document.getElementById('tableHead');
+            const tbody = document.getElementById('tableBody');
+            const search = document.getElementById('tableSearch').value.toLowerCase();
+            const pgSelected = document.getElementById('pgFilter').value;
+
+            let data = currentTab === 'pipa' ? pipaData : pompaData;
+            let cols = currentTab === 'pipa' ? 
+                ['PG', 'Gudang', 'Jenis_Pipa', 'Sub_Total', 'Good', 'Reject'] : 
+                ['PG', 'Gudang', 'Jenis_Pompa', 'Spec_Pompa', 'Grand_Total', 'Aktif', 'Re_Kondisi', 'Scrap'];
+
+            let filtered = data.filter(item => {
+                let matchPG = pgSelected === 'ALL' || item.PG === pgSelected;
+                let matchSearch = cols.some(c => String(item[c] || '').toLowerCase().includes(search));
+                return matchPG && matchSearch;
+            });
+
+            thead.innerHTML = `<tr>` + cols.map(c => `<th class="px-4 py-3">${c.replace('_', ' ')}</th>`).join('') + `</tr>`;
+
+            if (filtered.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="${cols.length}" class="text-center py-6 text-slate-400">Data tidak ditemukan</td></tr>`;
+            } else {
+                tbody.innerHTML = filtered.map(row => {
+                    return `<tr class="hover:bg-slate-50">` + cols.map(c => `<td class="px-4 py-3">${row[c] || '-'}</td>`).join('') + `</tr>`;
+                }).join('');
+            }
+
+            document.getElementById('rowCount').innerText = `Menampilkan ${filtered.length} baris`;
+        }
+
+        function filterTable() { renderTable(); }
+        function applyFilters() { renderTable(); }
+
+        window.onload = () => {
+            initCharts();
+            switchTab('pipa');
+        };
+    </script>
+</body>
+</html>
